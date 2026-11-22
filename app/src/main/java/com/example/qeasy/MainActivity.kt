@@ -10,19 +10,23 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.border
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 private val Navy = Color(0xFF19365F)
 private val Blue = Color(0xFF3478D4)
-private val Background = Color(0xFFF2F5FA)
+private val Background = Color(0xFFF3F6FB)
 private val Muted = Color(0xFF718096)
+private val LightBlue = Color(0xFFE8F0FE)
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,89 +41,142 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun QEasyProfile() {
+
     var isEditing by remember { mutableStateOf(false) }
 
     var fullName by remember { mutableStateOf("Your Name") }
-    var mobile by remember { mutableStateOf("98XXXXXXXX") }
+    var mobile by remember { mutableStateOf("9812345678") }
     var email by remember { mutableStateOf("you@example.com") }
 
     var draftName by remember { mutableStateOf(fullName) }
     var draftMobile by remember { mutableStateOf(mobile) }
     var draftEmail by remember { mutableStateOf(email) }
 
+    var hasAttemptedSave by remember { mutableStateOf(false) }
+    var message by remember { mutableStateOf("") }
+
+    val validName = draftName.trim().length >= 2
+    val validMobile = draftMobile.matches(Regex("^[0-9+() -]{7,15}$"))
+    val validEmail = android.util.Patterns.EMAIL_ADDRESS
+        .matcher(draftEmail.trim()).matches()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Background)
             .verticalScroll(rememberScrollState())
-            .padding(22.dp)
+            .padding(20.dp)
     ) {
-        Text(
-            text = "QEasy",
-            color = Blue,
-            fontSize = 17.sp,
-            fontWeight = FontWeight.Bold
-        )
 
-        Spacer(modifier = Modifier.height(28.dp))
+        // Header
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "QEasy",
+                color = Blue,
+                fontSize = 25.sp,
+                fontWeight = FontWeight.Bold
+            )
+
+            Text(
+                text = "MY ACCOUNT",
+                color = Muted,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
+
+        Spacer(modifier = Modifier.height(32.dp))
 
         Text(
-            text = if (isEditing) "Edit Profile" else "Personal Details",
+            text = if (isEditing) "Edit Profile" else "My Profile",
             color = Navy,
-            fontSize = 27.sp,
+            fontSize = 28.sp,
             fontWeight = FontWeight.Bold
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(7.dp))
 
         Text(
             text = if (isEditing)
-                "Update your personal information below."
+                "Update your personal information."
             else
-                "Manage your personal information.",
+                "View and manage your personal details.",
             color = Muted,
             fontSize = 14.sp
         )
 
-        Spacer(modifier = Modifier.height(28.dp))
+        Spacer(modifier = Modifier.height(25.dp))
 
+        // Profile card
         Card(
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(20.dp),
+            shape = RoundedCornerShape(22.dp),
             colors = CardDefaults.cardColors(
                 containerColor = Color.White
             ),
-            elevation = CardDefaults.cardElevation(2.dp)
+            elevation = CardDefaults.cardElevation(3.dp)
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(22.dp),
+                    .padding(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Surface(
-                    modifier = Modifier.size(100.dp),
-                    shape = CircleShape,
-                    color = Color(0xFFE0ECFC)
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Text(
-                            text = "YN",
-                            color = Blue,
-                            fontSize = 30.sp,
-                            fontWeight = FontWeight.Bold
-                        )
+
+                Box(contentAlignment = Alignment.BottomEnd) {
+
+                    Surface(
+                        modifier = Modifier.size(100.dp),
+                        shape = CircleShape,
+                        color = LightBlue
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Text(
+                                text = fullName.trim()
+                                    .split(" ")
+                                    .filter { it.isNotBlank() }
+                                    .take(2)
+                                    .joinToString("") {
+                                        it.first().uppercase()
+                                    },
+                                color = Blue,
+                                fontSize = 30.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+
+                    Surface(
+                        modifier = Modifier
+                            .size(30.dp)
+                            .border(2.dp, Color.White, CircleShape),
+                        shape = CircleShape,
+                        color = Blue
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Text(
+                                text = "✎",
+                                color = Color.White,
+                                fontSize = 16.sp
+                            )
+                        }
                     }
                 }
 
-                Spacer(modifier = Modifier.height(14.dp))
+                Spacer(modifier = Modifier.height(15.dp))
 
                 Text(
                     text = fullName,
                     color = Navy,
-                    fontSize = 19.sp,
+                    fontSize = 20.sp,
                     fontWeight = FontWeight.Bold
                 )
+
+                Spacer(modifier = Modifier.height(5.dp))
 
                 Text(
                     text = "QEasy Member",
@@ -132,14 +189,19 @@ fun QEasyProfile() {
         Spacer(modifier = Modifier.height(24.dp))
 
         if (!isEditing) {
+
+            // Personal information
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(20.dp),
                 colors = CardDefaults.cardColors(
                     containerColor = Color.White
-                )
+                ),
+                elevation = CardDefaults.cardElevation(2.dp)
             ) {
-                Column(modifier = Modifier.padding(20.dp)) {
+                Column(
+                    modifier = Modifier.padding(20.dp)
+                ) {
                     Text(
                         text = "Personal Information",
                         color = Navy,
@@ -155,35 +217,46 @@ fun QEasyProfile() {
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(25.dp))
 
             Button(
                 onClick = {
                     draftName = fullName
                     draftMobile = mobile
                     draftEmail = email
+                    hasAttemptedSave = false
+                    message = ""
                     isEditing = true
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(54.dp),
-                shape = RoundedCornerShape(12.dp),
+                    .height(55.dp),
+                shape = RoundedCornerShape(14.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Blue
                 )
             ) {
-                Text("Edit Profile", fontSize = 16.sp)
+                Text(
+                    text = "Edit Profile",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
             }
 
         } else {
+
+            // Edit information form
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(20.dp),
                 colors = CardDefaults.cardColors(
                     containerColor = Color.White
-                )
+                ),
+                elevation = CardDefaults.cardElevation(2.dp)
             ) {
-                Column(modifier = Modifier.padding(20.dp)) {
+                Column(
+                    modifier = Modifier.padding(20.dp)
+                ) {
                     Text(
                         text = "Update Information",
                         color = Navy,
@@ -191,7 +264,7 @@ fun QEasyProfile() {
                         fontWeight = FontWeight.Bold
                     )
 
-                    Spacer(modifier = Modifier.height(18.dp))
+                    Spacer(modifier = Modifier.height(20.dp))
 
                     OutlinedTextField(
                         value = draftName,
@@ -199,10 +272,16 @@ fun QEasyProfile() {
                         label = { Text("Full Name") },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
+                        isError = hasAttemptedSave && !validName,
+                        supportingText = {
+                            if (hasAttemptedSave && !validName) {
+                                Text("Enter at least 2 characters.")
+                            }
+                        },
                         shape = RoundedCornerShape(12.dp)
                     )
 
-                    Spacer(modifier = Modifier.height(14.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
 
                     OutlinedTextField(
                         value = draftMobile,
@@ -210,10 +289,19 @@ fun QEasyProfile() {
                         label = { Text("Mobile Number") },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Phone
+                        ),
+                        isError = hasAttemptedSave && !validMobile,
+                        supportingText = {
+                            if (hasAttemptedSave && !validMobile) {
+                                Text("Enter a valid mobile number.")
+                            }
+                        },
                         shape = RoundedCornerShape(12.dp)
                     )
 
-                    Spacer(modifier = Modifier.height(14.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
 
                     OutlinedTextField(
                         value = draftEmail,
@@ -221,49 +309,92 @@ fun QEasyProfile() {
                         label = { Text("Email Address") },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Email
+                        ),
+                        isError = hasAttemptedSave && !validEmail,
+                        supportingText = {
+                            if (hasAttemptedSave && !validEmail) {
+                                Text("Enter a valid email address.")
+                            }
+                        },
                         shape = RoundedCornerShape(12.dp)
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(22.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
             Button(
                 onClick = {
-                    fullName = draftName
-                    mobile = draftMobile
-                    email = draftEmail
-                    isEditing = false
+                    hasAttemptedSave = true
+
+                    if (validName && validMobile && validEmail) {
+                        fullName = draftName.trim()
+                        mobile = draftMobile.trim()
+                        email = draftEmail.trim()
+                        isEditing = false
+                        message = "Profile updated successfully."
+                        hasAttemptedSave = false
+                    }
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(54.dp),
-                shape = RoundedCornerShape(12.dp),
+                    .height(55.dp),
+                shape = RoundedCornerShape(14.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Blue
                 )
             ) {
-                Text("Save Changes", fontSize = 16.sp)
+                Text(
+                    text = "Save Changes",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
             }
 
             Spacer(modifier = Modifier.height(10.dp))
 
             OutlinedButton(
-                onClick = { isEditing = false },
+                onClick = {
+                    draftName = fullName
+                    draftMobile = mobile
+                    draftEmail = email
+                    hasAttemptedSave = false
+                    isEditing = false
+                },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(54.dp),
-                shape = RoundedCornerShape(12.dp)
+                    .height(55.dp),
+                shape = RoundedCornerShape(14.dp)
             ) {
-                Text("Cancel", color = Navy)
+                Text(
+                    text = "Cancel",
+                    color = Navy,
+                    fontSize = 15.sp
+                )
             }
         }
+
+        if (message.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(15.dp))
+
+            Text(
+                text = message,
+                color = Color(0xFF16804A),
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium
+            )
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
     }
 }
 
 @Composable
 fun DetailRow(label: String, value: String) {
     Column(modifier = Modifier.fillMaxWidth()) {
+
         Text(
             text = label,
             color = Muted,
@@ -276,9 +407,9 @@ fun DetailRow(label: String, value: String) {
             text = value,
             color = Navy,
             fontSize = 15.sp,
-            fontWeight = FontWeight.Medium
+            fontWeight = FontWeight.SemiBold
         )
 
-        Spacer(modifier = Modifier.height(17.dp))
+        Spacer(modifier = Modifier.height(19.dp))
     }
 }
