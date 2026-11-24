@@ -1,4 +1,4 @@
-package com.example.sandy.ui.theme
+package com.example.sandy
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
