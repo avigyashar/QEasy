@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">QEasy</string>
+    <string name="title_activity_forget_password">forget_password</string>
+    <string name="title_activity_otp">OTP</string>
+</resources>
